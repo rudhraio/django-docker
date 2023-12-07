@@ -72,7 +72,7 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          docker buildx build --platform=linux/amd64,linux/arm64,linux/arm/v7 -t django-project:latest . > build_logs.txt 2>&1
+          docker buildx build --platform=linux/arm64 -t django-project:latest --load . > build_logs.txt 2>&1
           cat build_logs.txt
           docker images
         
