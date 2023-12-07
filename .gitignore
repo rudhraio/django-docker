@@ -23,6 +23,5 @@ venv.bak/
 
 
 # Django Migrations
-**/migrations/**
 !**/migrations
 !**/migrations/__init__.py
