@@ -7,7 +7,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.CharField(max_length=200, null=True, blank=True)
-    # tags = models.CharField(max_length=200, null=True, blank=True)
+    tags = models.CharField(max_length=200, null=True, blank=True)
 
     created_at = models.DateTimeField("Created at", auto_now_add=True)
 
