@@ -72,16 +72,17 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          docker buildx build --platform linux/arm64 -t django-project:arm .
+          docker buildx build --platform=linux/amd64,linux/arm64,linux/arm/v7 -t django-project:latest . > build_logs.txt 2>&1
+          cat build_logs.txt
           docker images
         
       - name: Tag the Docker image
         run: |
-          docker tag django-project:arm 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:arm
+          docker tag django-project:latest 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:latest
 
       - name: Push Docker image to ECR
         run: |
-          docker push 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:arm
+          docker push 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:latest
 
   # deploy:
   #   needs: docker-build-and-push
