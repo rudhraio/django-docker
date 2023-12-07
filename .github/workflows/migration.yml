@@ -42,5 +42,73 @@ jobs:
           mv .gitignore_temp .gitignore
 
           git add .
-          git commit -m "Run Django migrations"
-          git push origin migrations
+          git commit -m "Run Django migrations" || true
+          git push origin migrations || true
+  
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1 # Replace with your ECR region
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 556431762846.dkr.ecr.ap-south-1.amazonaws.com
+
+      - name: Build the Docker image
+        run: |
+          docker build -t django-project:latest .
+        
+      - name: Tag the Docker image
+        run: |
+          docker tag django-project:latest 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:latest
+
+      - name: Push Docker image to ECR
+        run: |
+          docker push 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:latest
+
+  # deploy:
+  #   needs: docker-build-and-push
+  #   runs-on: ubuntu-latest
+  #   environment: beta
+  #   env:
+  #     HOST: ${{ secrets.HOST }}
+  #     USER: ${{ secrets.USER }}
+  #     KEY: ${{ secrets.KEY }}
+  #     PORT: ${{ secrets.PORT }}
+  #     NAME: deploy-server
+  #   steps:
+  #     - name: create key
+  #       run: |
+  #         mkdir -p ~/.ssh/
+  #         echo "${{ env.KEY }}" > ~/.ssh/${{ env.NAME }}.key
+  #         sudo chmod 600 ~/.ssh/${{ env.NAME }}.key
+  #       shell: bash
+  #     - name: Scan the public ssh host keys
+  #       run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
+  #       shell: bash
+  #     - name: Create SSH config
+  #       run: |
+  #         cat >>~/.ssh/config <<END
+  #         Host ${{ env.NAME }}
+  #           HostName ${{ env.HOST }}
+  #           Port ${{ env.PORT }}
+  #           User ${{ env.USER }}
+  #           IdentityFile ~/.ssh/${{ env.NAME }}.key
+  #         END
+  #       shell: bash
+  #     - name: run commands
+  #       run:  |
+  #         ssh ${{env.NAME}} << EOF
+            
+  #         EOF
+  #       shell: bash
