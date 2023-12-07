@@ -5,18 +5,9 @@ services:
     image: 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project
     environment:
       - CONFIG_PATH=common/configs/prod.cfg
-    command: >
-      gunicorn
-      --access-logfile -
-      --workers 3
-      --max-requests 1000
-      --max-requests-jitter 50
-      --bind 0.0.0.0:8000
-      myproject.wsgi:application -e CONFIG_PATH=common/configs/prod.cfg
+    command: gunicorn --access-logfile - --workers 3 --max-requests 1000 --max-requests-jitter 50 --bind 0.0.0.0:8000 --env CONFIG_PATH=common/configs/prod.cfg myproject.wsgi:application
     ports:
       - "8000:8000"
-    volumes:
-      - ./:/app
     depends_on:
       - celery
       - consumer
@@ -28,7 +19,8 @@ services:
     image: 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project
     environment:
       - CONFIG_PATH=common/configs/prod.cfg
-    command: python -m celery -A myproject worker -l info -Q myproject
+      - DJANGO_SETTINGS_MODULE=myproject.settings
+    command: celery -A myproject worker -l info -Q myproject
     networks:
       - django-network
 
@@ -37,27 +29,11 @@ services:
     image: 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project
     environment:
       - CONFIG_PATH=common/configs/prod.cfg
+      - DJANGO_SETTINGS_MODULE=myproject.settings
     command: python consumer.py
     networks:
       - django-network
 
-  rabbitmq:
-    image: rabbitmq:latest
-    ports:
-      - "5672:5672"  # RabbitMQ default port
-      - "15672:15672"  # RabbitMQ Management Plugin port (optional)
-    environment:
-      RABBITMQ_DEFAULT_USER: guest  # Default user
-      RABBITMQ_DEFAULT_PASS: guest  # Default user password
-      RABBITMQ_DEFAULT_VHOST: /
-      RABBITMQ_ERLANG_COOKIE: "secretcookie"  # Change this to your desired Erlang cookie
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq  # Persist data to avoid losing it when the container restarts
-
 networks:
   django-network:
     driver: bridge
-
-volumes:
-  rabbitmq_data:
-    driver: local

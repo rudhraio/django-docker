@@ -1,11 +1,14 @@
-import pika
-import json
-from common.configs.config import config as cfg
-from myapp.models import Product, ProductInventory
 import os
 import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "myproject.settings")
 django.setup()
+
+
+import pika
+import json
+from common.configs.config import config as cfg
+from myapp.models import Product, ProductInventory
+
 
 
 credentials = pika.PlainCredentials(
