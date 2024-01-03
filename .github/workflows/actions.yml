@@ -1,26 +1,19 @@
-name: Django Migration Workflow
-
-on:
-  push:
-    branches:
-      - main
-
+name: remote ssh command
+on: [push]
 jobs:
   deploy:
+    name: deploy
     runs-on: ubuntu-latest
     environment: beta
     steps:
-      - name: SSH commands
-        uses: rudhraio/ssh@main
-        with:
-          host: ${{ secrets.HOST }}
-          user: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }} 
-          passphrase: ${{ secrets.PASSPHRASE }}
-          commands: |
-            mkdir sample
-            cd sample
-            touch hello.txt
-            echo "Welcome to my world" >> hello.txt
-      - name: create key
-        run: echo "hello"
+    - name: executing remote ssh commands using key
+      uses: worketeam/ssh
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.KEY }}
+        passphrase: ${{ secrets.PASSPHRASE }}
+        port: ${{ secrets.PORT }}
+        commands: |
+            whoami
+            ls -l
