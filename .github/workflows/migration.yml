@@ -104,6 +104,8 @@ jobs:
           commands: |
             cd home
             touch hello.txt
+      - name: create key
+        run: echo "hello"
   #     - name: create key
   #       run: |
   #         mkdir -p ~/.ssh/
