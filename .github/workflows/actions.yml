@@ -13,7 +13,6 @@ jobs:
         user: ${{ secrets.USER }}
         key: ${{ secrets.KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
-        port: ${{ secrets.PORT }}
         commands: |
             whoami
             ls -l
