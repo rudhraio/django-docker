@@ -15,7 +15,8 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
-          password: ${{ secrets.PASSWORD }} # Use password or key, based on your setup
+          key: ${{ secrets.key }} 
+          # passphrase: ${{ secrets.passphrase }}
           commands: |
             mkdir sample
             cd sample
