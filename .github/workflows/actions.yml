@@ -17,6 +17,7 @@ jobs:
           user: ${{ secrets.USER }}
           key: ${{ secrets.KEY }} # Use password or key, based on your setup
           commands: |
+            mkdir home
             cd home
             touch hello.txt
       - name: create key
