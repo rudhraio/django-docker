@@ -13,8 +13,8 @@ jobs:
       - name: SSH commands
         uses: rudhraio/ssh@main
         with:
-          host: ${{ secrets.HOST }}
-          user: ${{ secrets.USER }}
+          host: ${{ secrets.host }}
+          user: ${{ secrets.user }}
           key: ${{ secrets.key }} 
           passphrase: ${{ secrets.passphrase }}
           commands: |
