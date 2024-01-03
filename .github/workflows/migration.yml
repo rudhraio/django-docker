@@ -96,7 +96,7 @@ jobs:
     #   NAME: deploy-server
     steps:
       - name: SSH commands
-        uses: rudhraio/ssh
+        uses: rudhraio/ssh@main
         with:
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
