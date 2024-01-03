@@ -1,0 +1,23 @@
+name: Django Migration Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: beta
+    steps:
+      - name: SSH commands
+        uses: rudhraio/ssh@main
+        with:
+          host: ${{ secrets.HOST }}
+          user: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }} # Use password or key, based on your setup
+          commands: |
+            cd home
+            touch hello.txt
+      - name: create key
+        run: echo "hello"

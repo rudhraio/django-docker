@@ -3,7 +3,7 @@ name: Django Migration Workflow
 on:
   push:
     branches:
-      - main
+      - check
 
 jobs:
   # migrate_and_push:
