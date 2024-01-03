@@ -13,10 +13,10 @@ jobs:
       - name: SSH commands
         uses: rudhraio/ssh@main
         with:
-          host: ${{ secrets.host }}
-          user: ${{ secrets.user }}
-          key: ${{ secrets.key }} 
-          passphrase: ${{ secrets.passphrase }}
+          host: ${{ secrets.HOST }}
+          user: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }} 
+          passphrase: ${{ secrets.PASSPHRASE }}
           commands: |
             mkdir sample
             cd sample
