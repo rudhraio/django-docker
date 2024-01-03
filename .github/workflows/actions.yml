@@ -16,7 +16,7 @@ jobs:
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
           key: ${{ secrets.key }} 
-          # passphrase: ${{ secrets.passphrase }}
+          passphrase: ${{ secrets.passphrase }}
           commands: |
             mkdir sample
             cd sample
