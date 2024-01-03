@@ -6,95 +6,104 @@ on:
       - main
 
 jobs:
-  migrate_and_push:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Git
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-
-      - name: Pull migrations branch if exists
-        run: |
-          git fetch origin migrations:migrations || true
-          git checkout migrations || git checkout -b migrations
-
-          git branch
-          git status
-
-          git config pull.rebase false
-          git pull --no-edit origin main --allow-unrelated-histories
-        
-      - name: Run Django migrations
-        run: |
-          export CONFIG_PATH=common/configs/prod.cfg
-          make migrations
-
-      - name: Commit and push new migration files
-        run: |
-          grep -vE '^\*\*/migrations/\*\*' .gitignore > .gitignore_temp
-          mv .gitignore_temp .gitignore
-
-          git add .
-          git commit -m "Run Django migrations" || true
-          git push origin migrations || true
-  
-  docker-build-and-push:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1 # Replace with your ECR region
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        run: |
-          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 556431762846.dkr.ecr.ap-south-1.amazonaws.com
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build the Docker image
-        run: |
-          docker buildx build --platform=linux/arm64 -t django-project:latest --load . > build_logs.txt 2>&1
-          cat build_logs.txt
-          docker images
-        
-      - name: Tag the Docker image
-        run: |
-          docker tag django-project:latest 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:latest
-
-      - name: Push Docker image to ECR
-        run: |
-          docker push 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:latest
-
-  # deploy:
-  #   needs: docker-build-and-push
+  # migrate_and_push:
   #   runs-on: ubuntu-latest
-  #   environment: beta
-  #   env:
-  #     HOST: ${{ secrets.HOST }}
-  #     USER: ${{ secrets.USER }}
-  #     KEY: ${{ secrets.KEY }}
-  #     PORT: ${{ secrets.PORT }}
-  #     NAME: deploy-server
+
   #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+
+  #     - name: Set up Git
+  #       run: |
+  #         git config --global user.email "actions@github.com"
+  #         git config --global user.name "GitHub Actions"
+
+  #     - name: Pull migrations branch if exists
+  #       run: |
+  #         git fetch origin migrations:migrations || true
+  #         git checkout migrations || git checkout -b migrations
+
+  #         git branch
+  #         git status
+
+  #         git config pull.rebase false
+  #         git pull --no-edit origin main --allow-unrelated-histories
+        
+  #     - name: Run Django migrations
+  #       run: |
+  #         export CONFIG_PATH=common/configs/prod.cfg
+  #         make migrations
+
+  #     - name: Commit and push new migration files
+  #       run: |
+  #         grep -vE '^\*\*/migrations/\*\*' .gitignore > .gitignore_temp
+  #         mv .gitignore_temp .gitignore
+
+  #         git add .
+  #         git commit -m "Run Django migrations" || true
+  #         git push origin migrations || true
+  
+  # docker-build-and-push:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ap-south-1 # Replace with your ECR region
+
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       run: |
+  #         aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 556431762846.dkr.ecr.ap-south-1.amazonaws.com
+
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+
+  #     - name: Build the Docker image
+  #       run: |
+  #         docker buildx build --platform=linux/arm64 -t django-project:latest --load . > build_logs.txt 2>&1
+  #         cat build_logs.txt
+  #         docker images
+        
+  #     - name: Tag the Docker image
+  #       run: |
+  #         docker tag django-project:latest 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:latest
+
+  #     - name: Push Docker image to ECR
+  #       run: |
+  #         docker push 556431762846.dkr.ecr.ap-south-1.amazonaws.com/django-project:latest
+
+  deploy:
+    needs: docker-build-and-push
+    runs-on: ubuntu-latest
+    environment: beta
+    # env:
+    #   HOST: ${{ secrets.HOST }}
+    #   USER: ${{ secrets.USER }}
+    #   KEY: ${{ secrets.KEY }}
+    #   PORT: ${{ secrets.PORT }}
+    #   NAME: deploy-server
+    steps:
+      - name: SSH commands
+        uses: rudhraio/ssh
+        with:
+          host: ${{ secrets.HOST }}
+          user: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }} # Use password or key, based on your setup
+          commands: |
+            cd home
+            touch hello.txt
   #     - name: create key
   #       run: |
   #         mkdir -p ~/.ssh/
