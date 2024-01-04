@@ -7,7 +7,7 @@ jobs:
     environment: beta
     steps:
     - name: executing remote ssh commands using key
-      uses: worketeam/ssh@v1
+      uses: rudhraio/ssh@v1
       with:
         host: ${{ secrets.HOST }}
         user: ${{ secrets.USER }}
